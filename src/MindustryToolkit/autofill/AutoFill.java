@@ -13,6 +13,7 @@ import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.gen.Call;
 import mindustry.gen.Player;
+import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.world.Block;
 import mindustry.world.Build;
@@ -20,7 +21,6 @@ import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.logic.MessageBlock;
 import mindustry.world.blocks.production.GenericCrafter;
 import mindustry.world.blocks.storage.CoreBlock;
-import mindustry.type.Item;
 import mindustry.world.blocks.units.Reconstructor;
 import mindustry.world.blocks.units.UnitFactory;
 import mindustry.world.consumers.*;
@@ -100,7 +100,7 @@ public class AutoFill {
         AtomicReference<Item> request = new AtomicReference<>(null);
         // Search Blocks
         Seq<Building> buildingsInRange = new Seq<>(new Building[]{});
-        Vars.indexer.eachBlock(team, player.x, player.y, Vars.buildingRange, (Building building) -> !isBlockIgnored(building.block()) && building.block.hasConsumers, buildingsInRange::add);
+        Vars.indexer.eachBlock(team, player.x, player.y, Vars.buildingRange, (Building building) -> !isBlockIgnored(building.block) && building.block.hasConsumers, buildingsInRange::add);
         if (buildingsInRange.any() && isCoreAvailable) {
             FillableBlockCategory[] categories = this.getBlocksToFill(buildingsInRange);
             Whole:
@@ -134,7 +134,7 @@ public class AutoFill {
                         }
                         if (bestAmmo == null || b.acceptStack(bestAmmo, 999, player.unit()) == 0) continue;
                         request.set(bestAmmo);
-                        //Vars.player.sendMessage("Chose " + bestAmmo.localizedName + " to fill " + block.block().localizedName + " at " + b.tile().x + " " + b.tile().y + " with " + +b.items.total() + " (" + ((ItemTurret.ItemTurretBuild) b).totalAmmo + ") items inside out of " + b.getMaximumAccepted(null));
+                        //Vars.player.sendMessage("Chose " + bestAmmo.localizedName + " to fill " + block.block().localizedName + " at " + b.tile().x + " " + b.tile().y + " with " + +b.items.total() + " items.");
                     } else if (block.building() != null) {
                         request.set(findRequiredItem(block.itemsIn(), block.building(), core));
                     } else {
@@ -148,7 +148,7 @@ public class AutoFill {
         }
 
         String a = """
-                    Vars.indexer.eachBlock(team, player.x, player.y, Vars.buildingRange, (Building building) -> !isBlockIgnored(building.block()) && building.block.hasConsumers, b -> {
+                    Vars.indexer.eachBlock(team, player.x, player.y, Vars.buildingRange, (Building building) -> !isBlockIgnored(building.block) && building.block.hasConsumers, b -> {
                     if (!interactTimer.canInteract()) return;
 
                     // Blocks Declaration
@@ -192,7 +192,7 @@ public class AutoFill {
                                 break;
                             }
                         if (bestAmmo == null) return;
-                        Vars.player.sendMessage("Chose " + bestAmmo.localizedName + " to fill " + block.localizedName + " at " + b.tile().x + " " + b.tile().y + " with " + b.items.total() + " items inside out of " + b.getMaximumAccepted(null));
+                        Vars.player.sendMessage("Chose " + bestAmmo.localizedName + " to fill " + block.localizedName + " at " + b.tile().x + " " + b.tile().y + " with " + b.items.total() + " items.");
                         request.set(bestAmmo);
                     } else if (block instanceof UnitFactory) { // Fill unit factory
                         request.set(getUnitFactoryRequest((UnitFactory.UnitFactoryBuild) b, (UnitFactory) block, core));
@@ -222,17 +222,17 @@ public class AutoFill {
 
     private FillableBlockCategory[] getBlocksToFill(Seq<Building> buildings) {
         return new FillableBlockCategory[]{
-                new FillableBlockCategory("turret", buildings, b -> b.block() instanceof ItemTurret, building ->
-                        new FillableBlock().block(building.block()).itemsIn(getBestAmmoList((ItemTurret) building.block())).building(building)
+                new FillableBlockCategory("turret", buildings, b -> b.block instanceof ItemTurret, building ->
+                        new FillableBlock().block(building.block).itemsIn(getBestAmmoList((ItemTurret) building.block)).building(building)
                 ),
-                new FillableBlockCategory("unit-factory", buildings, b -> b.block() instanceof UnitFactory && ((UnitFactory.UnitFactoryBuild) b).currentPlan > -1, building ->
-                        new FillableBlock().block(building.block()).itemsIn(((UnitFactory) building.block()).plans.get(((UnitFactory.UnitFactoryBuild) building).currentPlan).requirements).building(building)
+                new FillableBlockCategory("unit-factory", buildings, b -> b.block instanceof UnitFactory && ((UnitFactory.UnitFactoryBuild) b).currentPlan > -1, building ->
+                        new FillableBlock().block(building.block).itemsIn(((UnitFactory) building.block).plans.get(((UnitFactory.UnitFactoryBuild) building).currentPlan).requirements).building(building)
                 ),
-                new FillableBlockCategory("unit-reconstructor", buildings, b -> b.block() instanceof Reconstructor, building ->
-                        new FillableBlock().block(building.block()).itemsIn(building.block().requirements).building(building)
+                new FillableBlockCategory("unit-reconstructor", buildings, b -> b.block instanceof Reconstructor, building ->
+                        new FillableBlock().block(building.block).itemsIn(building.block.requirements).building(building)
                 ),
-                new FillableBlockCategory("crafter", buildings, b -> b.block() instanceof GenericCrafter, building ->
-                        new FillableBlock().block(building.block()).itemsIn(getItemStacks(getItemConsumers(building.block()))).building(building)
+                new FillableBlockCategory("crafter", buildings, b -> b.block instanceof GenericCrafter, building ->
+                        new FillableBlock().block(building.block).itemsIn(getItemStacks(getItemConsumers(building.block))).building(building)
                 )
         };
     }
@@ -307,8 +307,7 @@ public class AutoFill {
         return ammoListSorted;
     }
 
-    public Item getUnitFactoryRequest(UnitFactory.UnitFactoryBuild build, UnitFactory block, CoreBlock.CoreBuild
-            core) {
+    public Item getUnitFactoryRequest(UnitFactory.UnitFactoryBuild build, UnitFactory block, CoreBlock.CoreBuild core) {
         if (build.currentPlan == -1) return null;
 
         ItemStack[] stacks = block.plans.get(build.currentPlan).requirements;
@@ -316,8 +315,7 @@ public class AutoFill {
         return findRequiredItem(stacks, build, core);
     }
 
-    public Item getReconstructorRequest(Reconstructor.ReconstructorBuild build, Reconstructor
-            block, CoreBlock.CoreBuild core) {
+    public Item getReconstructorRequest(Reconstructor.ReconstructorBuild build, Reconstructor block, CoreBlock.CoreBuild core) {
         ItemStack[] stacks = block.requirements;
 
         return findRequiredItem(stacks, build, core);
@@ -375,7 +373,7 @@ public class AutoFill {
             -1 this > other
              0 this = other
              1 this < other
-            */
+             */
             // this.damage
             // itemDamage.damage
             // return Float.compare(, ); // Again Intellij IDEA
