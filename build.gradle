@@ -88,16 +88,16 @@ jar {
 }
 
 task deploy(type: Jar) {
-    // dependsOn jarAndroid  // только для пк версии
+    // dependsOn jarAndroid
     dependsOn jar
     archiveFileName = "${base.archivesBaseName}.jar"
 
-    from { [zipTree("$buildDir/libs/${project.archivesBaseName}Desktop.jar"), zipTree("$buildDir/libs/${project.archivesBaseName}Android.jar")] }
+    from { [zipTree("$buildDir/libs/${project.archivesBaseName}Desktop.jar")] }
 
     doLast {
         delete {
             delete "$buildDir/libs/${project.archivesBaseName}Desktop.jar"
-            delete "$buildDir/libs/${project.archivesBaseName}Android.jar"
+            // delete "$buildDir/libs/${project.archivesBaseName}Android.jar"
         }
     }
 }
