@@ -104,9 +104,11 @@ public class SectorizedCoreCost {
 
         ItemSeq requirement = Vars.state.getPlanet() == Planets.serpulo ? requirementsSerpulo[core][size] : requirementsErekir[core][size];
 
-        if (team.core.items.has(requirement)) {
-            team.core.items.remove(requirement);
-            return true;
+        if (team.cores().size > 0) {
+            if (team.cores().first().items.has(requirement)) {
+                team.cores().first().items.remove(requirement);
+                return true;
+            }
         }
 
         return false;
