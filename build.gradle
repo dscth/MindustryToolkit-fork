@@ -24,10 +24,10 @@ ext {
     sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
 }
 
-//java 8 backwards compatibility flag
+//java 17 backwards compatibility flag
 allprojects {
     tasks.withType(JavaCompile) {
-        options.compilerArgs.addAll(['--release', '8'])
+        options.compilerArgs.addAll(['--release', '17'])
     }
 }
 
