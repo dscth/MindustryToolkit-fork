@@ -55,3 +55,4 @@ Core.settings.getString("usid-109.94.209.233:6567", "No USID found :-(")
 // Others:
 Core.settings.getString("usid-<serverIP>:<serverPORT(default:6567)>", "No USID found :-(")
 ```
+Guys, this is a fork for the latest version! And I don't know if it works (by kubikaugustyn)
